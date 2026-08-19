@@ -16,17 +16,17 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Lead {
 
-	public int $id           = 0;
-	public int $form_id      = 0;
-	public string $status    = 'new';
-	public string $name      = '';
-	public string $email     = '';
-	public string $phone     = '';
+	public int $id            = 0;
+	public int $form_id       = 0;
+	public string $status     = 'new';
+	public string $name       = '';
+	public string $email      = '';
+	public string $phone      = '';
 	public string $source_url = '';
-	public string $referer   = '';
-	public string $ip_hash   = '';
+	public string $referer    = '';
+	public string $ip_hash    = '';
 	public string $user_agent = '';
-	public int $user_id      = 0;
+	public int $user_id       = 0;
 	public string $created_at = '';
 
 	/** @var array<string, array{label: string, value: mixed, type: string}> */

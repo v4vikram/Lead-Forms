@@ -43,9 +43,12 @@ final class Validator {
 			// legitimately empty a value (sanitize_email() on "nope" returns
 			// ''), and that must read as "invalid", not as "left blank".
 			$had_input = is_array( $submitted )
-				? array() !== array_filter( $submitted, static function ( $item ): bool {
-					return is_scalar( $item ) && '' !== trim( (string) $item );
-				} )
+				? array() !== array_filter(
+					$submitted,
+					static function ( $item ): bool {
+						return is_scalar( $item ) && '' !== trim( (string) $item );
+					}
+				)
 				: ( is_scalar( $submitted ) && '' !== trim( (string) $submitted ) );
 
 			$error = $this->check( $field, $value, $had_input );

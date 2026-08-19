@@ -28,7 +28,9 @@ final class SubmissionResult {
 	private int $status_code;
 
 	/**
-	 * @param array<string, string> $errors Field errors keyed by field id.
+	 * Built through the named constructors below, never directly.
+	 *
+	 * $errors maps field id to the message shown against that field.
 	 */
 	private function __construct(
 		bool $success,
@@ -51,7 +53,9 @@ final class SubmissionResult {
 	}
 
 	/**
-	 * @param array<string, string> $errors Field errors keyed by field id.
+	 * A submission that failed validation.
+	 *
+	 * $errors maps field id to the message shown against that field.
 	 */
 	public static function invalid( string $message, array $errors ): self {
 		return new self( false, $message, $errors, 0, '', 422 );

@@ -36,38 +36,38 @@ final class FormSettings {
 	 */
 	public static function defaults(): array {
 		return array(
-			'heading'              => '',
-			'subheading'           => '',
-			'submit_label'         => __( 'Submit', 'lead-forms' ),
-			'success_message'      => __( 'Thanks! Your message has been sent.', 'lead-forms' ),
-			'error_message'        => __( 'Please check the highlighted fields and try again.', 'lead-forms' ),
-			'redirect_url'         => '',
+			'heading'             => '',
+			'subheading'          => '',
+			'submit_label'        => __( 'Submit', 'lead-forms' ),
+			'success_message'     => __( 'Thanks! Your message has been sent.', 'lead-forms' ),
+			'error_message'       => __( 'Please check the highlighted fields and try again.', 'lead-forms' ),
+			'redirect_url'        => '',
 
 			// Notification e-mail.
-			'notify'               => true,
-			'recipients'           => '',
-			'cc'                   => '',
-			'bcc'                  => '',
-			'subject'              => '',
-			'from_name'            => '',
-			'from_email'           => '',
-			'reply_to_field'       => '',
+			'notify'              => true,
+			'recipients'          => '',
+			'cc'                  => '',
+			'bcc'                 => '',
+			'subject'             => '',
+			'from_name'           => '',
+			'from_email'          => '',
+			'reply_to_field'      => '',
 
 			// Auto-reply to the person who submitted.
-			'autoreply'            => false,
-			'autoreply_subject'    => '',
-			'autoreply_message'    => '',
+			'autoreply'           => false,
+			'autoreply_subject'   => '',
+			'autoreply_message'   => '',
 
 			// Storage and anti-spam.
-			'store_leads'          => true,
-			'honeypot'             => true,
-			'min_submit_seconds'   => 3,
-			'rate_limit_per_hour'  => 8,
+			'store_leads'         => true,
+			'honeypot'            => true,
+			'min_submit_seconds'  => 3,
+			'rate_limit_per_hour' => 8,
 
 			// Presentation.
-			'theme'                => 'classic',
-			'accent_color'         => '#1e88f0',
-			'panel_color'          => '#7ba7d7',
+			'theme'               => 'classic',
+			'accent_color'        => '#1e88f0',
+			'panel_color'         => '#7ba7d7',
 		);
 	}
 
@@ -140,7 +140,7 @@ final class FormSettings {
 	private static function sanitize_color( string $value, string $fallback ): string {
 		$color = sanitize_hex_color( $value );
 
-		return $color ?: $fallback;
+		return is_string( $color ) && '' !== $color ? $color : $fallback;
 	}
 
 	/* ------------------------------------------------------------------ */

@@ -46,7 +46,9 @@ final class Field {
 	private string $error_message;
 
 	/**
-	 * @param string[] $options Choice list for select/radio/checkbox types.
+	 * Only from_array() may build a field, so every instance is sanitised.
+	 *
+	 * $options is a list of choice labels, used by select/radio/checkbox.
 	 */
 	private function __construct(
 		string $id,
@@ -260,8 +262,9 @@ final class Field {
 		return trim( $value, '_' );
 	}
 
-	/* ------------------------------------------------------------------ */
-
+	/**
+	 * The storage key, used in merge tags and stored with every lead.
+	 */
 	public function id(): string {
 		return $this->id;
 	}

@@ -57,7 +57,7 @@ final class RestController {
 				// per-form nonce plus the spam guard inside the handler.
 				'permission_callback' => '__return_true',
 				'args'                => array(
-					'form_id' => array(
+					'form_id'  => array(
 						'type'              => 'integer',
 						'required'          => true,
 						'sanitize_callback' => 'absint',

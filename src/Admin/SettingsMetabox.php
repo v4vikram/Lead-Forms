@@ -33,7 +33,7 @@ final class SettingsMetabox {
 
 	public function register_hooks(): void {
 		add_action( 'add_meta_boxes_' . FormPostType::POST_TYPE, array( $this, 'add_meta_boxes' ) );
-		add_action( 'save_post_' . FormPostType::POST_TYPE, array( $this, 'save' ), 10, 2 );
+		add_action( 'save_post_' . FormPostType::POST_TYPE, array( $this, 'save' ) );
 	}
 
 	/**
@@ -318,20 +318,23 @@ final class SettingsMetabox {
 	/**
 	 * Persist the settings.
 	 *
-	 * @param int     $post_id Post being saved.
-	 * @param WP_Post $post    Post object.
+	 * @param int $post_id Post being saved.
 	 */
-	public function save( int $post_id, WP_Post $post ): void {
+	public function save( int $post_id ): void {
 		if ( ! FormBuilderMetabox::should_save( $post_id, self::NONCE_NAME, self::NONCE_ACTION ) ) {
 			return;
 		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- verified in should_save() above.
 
 		if ( ! isset( $_POST['lf_settings'] ) ) {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in should_save().
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitised key by key in FormSettings::sanitize().
 		$raw = wp_unslash( $_POST['lf_settings'] );
+
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		$this->forms->save_settings( $post_id, is_array( $raw ) ? $raw : array() );
 	}

@@ -35,7 +35,7 @@ final class LeadsListTable extends WP_List_Table {
 	private string $search;
 
 	/**
-	 * @param array<int, string> $forms Available forms.
+	 * $forms maps form id to title, for the Form column and the filter.
 	 */
 	public function __construct( LeadRepository $leads, array $forms, int $form_id, string $status, string $search ) {
 		parent::__construct(
@@ -112,12 +112,12 @@ final class LeadsListTable extends WP_List_Table {
 
 			$url = LeadsPage::url(
 				array(
-					'form_id' => $this->form_id ?: null,
+					'form_id' => $this->form_id > 0 ? $this->form_id : null,
 					'status'  => '' !== $slug ? $slug : null,
 				)
 			);
 
-			$views[ $slug ?: 'all' ] = sprintf(
+			$views[ '' !== $slug ? $slug : 'all' ] = sprintf(
 				'<a href="%s"%s>%s <span class="count">(%s)</span></a>',
 				esc_url( $url ),
 				$this->status === $slug ? ' class="current" aria-current="page"' : '',
@@ -327,7 +327,7 @@ final class LeadsListTable extends WP_List_Table {
 		$url = wp_nonce_url(
 			LeadsPage::url(
 				array(
-					'form_id'   => $this->form_id ?: null,
+					'form_id'   => $this->form_id > 0 ? $this->form_id : null,
 					'status'    => '' !== $this->status ? $this->status : null,
 					'lf_action' => $action,
 					'lead'      => $lead_id,

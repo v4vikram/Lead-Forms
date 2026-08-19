@@ -25,7 +25,7 @@ final class Form {
 	private FormSettings $settings;
 
 	/**
-	 * @param Field[] $fields Ordered field list.
+	 * $fields is the ordered list of Field objects to render.
 	 */
 	public function __construct( int $id, string $title, array $fields, FormSettings $settings ) {
 		$this->id       = $id;

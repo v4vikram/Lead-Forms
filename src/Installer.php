@@ -193,13 +193,13 @@ final class Installer {
 			$form_id,
 			FormPostType::META_SETTINGS,
 			array(
-				'heading'          => __( 'Book Your Visit Now!', 'lead-forms' ),
-				'subheading'       => __( 'Let us know how to get back to you.', 'lead-forms' ),
-				'submit_label'     => __( 'SUBMIT', 'lead-forms' ),
-				'success_message'  => __( 'Thank you! We have received your request and will call you back shortly.', 'lead-forms' ),
-				'recipients'       => get_option( 'admin_email' ),
-				'store_leads'      => true,
-				'notify'           => true,
+				'heading'         => __( 'Book Your Visit Now!', 'lead-forms' ),
+				'subheading'      => __( 'Let us know how to get back to you.', 'lead-forms' ),
+				'submit_label'    => __( 'SUBMIT', 'lead-forms' ),
+				'success_message' => __( 'Thank you! We have received your request and will call you back shortly.', 'lead-forms' ),
+				'recipients'      => get_option( 'admin_email' ),
+				'store_leads'     => true,
+				'notify'          => true,
 			)
 		);
 	}

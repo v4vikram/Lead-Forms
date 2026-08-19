@@ -97,8 +97,8 @@ final class BlockRegistrar {
 			$handle,
 			'window.leadFormsBlockData = ' . wp_json_encode(
 				array(
-					'forms'   => $options,
-					'newUrl'  => admin_url( 'post-new.php?post_type=lead_form' ),
+					'forms'  => $options,
+					'newUrl' => admin_url( 'post-new.php?post_type=lead_form' ),
 				)
 			) . ';',
 			'before'

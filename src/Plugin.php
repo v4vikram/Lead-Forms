@@ -92,10 +92,9 @@ final class Plugin {
 		do_action( 'lead_forms_booted', $this );
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Paths, URLs and metadata.
-	 * ------------------------------------------------------------------ */
-
+	/**
+	 * The plugin version, used to cache-bust enqueued assets.
+	 */
 	public function version(): string {
 		return $this->version;
 	}
@@ -124,10 +123,9 @@ final class Plugin {
 		return (string) apply_filters( 'lead_forms_capability', 'edit_pages' );
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Service accessors. Each service is created once and reused.
-	 * ------------------------------------------------------------------ */
-
+	/**
+	 * Service accessors. Each service is built once and reused.
+	 */
 	public function forms(): FormPostType {
 		return $this->service( 'forms', fn() => new FormPostType() );
 	}

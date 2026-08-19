@@ -25,6 +25,30 @@
 		autoloader can find them, rather than WordPress's class-*.php convention.
 		-->
 		<exclude name="WordPress.Files.FileName"/>
+
+		<!--
+		The sniffs below predate PHP 7 type declarations and ask for docblocks
+		that would only restate the signature:
+
+			/**
+			 * @var FormRepository       <- already `private FormRepository $forms;`
+			 */
+
+		This codebase declares parameter, return and property types on every
+		member, so the type information is enforced by the engine rather than
+		by a comment that can silently drift out of date.
+
+		Docblocks are still written wherever they carry something a signature
+		cannot express: array shapes, units, nullability rationale and hook
+		contracts. The sniffs that police those (param name mismatches,
+		malformed tags, missing translator comments) stay switched on.
+		-->
+		<exclude name="Squiz.Commenting.FunctionComment.Missing"/>
+		<exclude name="Squiz.Commenting.FunctionComment.MissingParamTag"/>
+		<exclude name="Squiz.Commenting.FunctionComment.IncorrectTypeHint"/>
+		<exclude name="Squiz.Commenting.VariableComment.Missing"/>
+		<exclude name="Squiz.Commenting.VariableComment.MissingVar"/>
+		<exclude name="Generic.Commenting.DocComment.MissingShort"/>
 	</rule>
 
 	<rule ref="WordPress.WP.I18n">
@@ -37,12 +61,24 @@
 
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
 		<properties>
+			<!-- Must be 4+ characters, so the `lf_` markup prefix is not listed. -->
 			<property name="prefixes" type="array">
 				<element value="lead_forms"/>
 				<element value="LeadForms"/>
-				<element value="lf_"/>
 			</property>
 		</properties>
+	</rule>
+
+	<!--
+	Leads live in their own table, so there is no core API to go through and
+	no object cache to invalidate: a direct query is the only option. Scoped
+	to the one repository that owns that table, so a stray query elsewhere is
+	still reported.
+	-->
+	<rule ref="WordPress.DB.DirectDatabaseQuery">
+		<include-pattern>src/Leads/LeadRepository.php</include-pattern>
+		<include-pattern>uninstall.php</include-pattern>
+		<severity>0</severity>
 	</rule>
 
 	<!-- Verify the plugin still runs on every PHP version it claims to support. -->

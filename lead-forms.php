@@ -33,15 +33,15 @@ const PLUGIN_FILE = __FILE__;
  * while still following the one-class-per-file / namespace-maps-to-folder rule.
  */
 spl_autoload_register(
-	static function ( string $class ): void {
+	static function ( string $class_name ): void {
 		$prefix = __NAMESPACE__ . '\\';
 		$length = strlen( $prefix );
 
-		if ( 0 !== strncmp( $prefix, $class, $length ) ) {
+		if ( 0 !== strncmp( $prefix, $class_name, $length ) ) {
 			return;
 		}
 
-		$relative = substr( $class, $length );
+		$relative = substr( $class_name, $length );
 		$file     = __DIR__ . '/src/' . str_replace( '\\', '/', $relative ) . '.php';
 
 		if ( is_readable( $file ) ) {

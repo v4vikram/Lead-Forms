@@ -130,7 +130,8 @@ final class AdminPostHandler {
 		$candidate = isset( $request['lf_source_url'] ) ? esc_url_raw( (string) $request['lf_source_url'] ) : '';
 
 		if ( '' === $candidate ) {
-			$candidate = wp_get_referer() ?: home_url( '/' );
+			$referer   = wp_get_referer();
+			$candidate = is_string( $referer ) && '' !== $referer ? $referer : home_url( '/' );
 		}
 
 		// Only ever redirect within this site.

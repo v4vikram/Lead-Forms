@@ -53,9 +53,12 @@ final class LeadsPage {
 				'post_type' => FormPostType::POST_TYPE,
 				'page'      => self::SLUG,
 			),
-			array_filter( $args, static function ( $value ): bool {
-				return null !== $value && '' !== $value;
-			} )
+			array_filter(
+				$args,
+				static function ( $value ): bool {
+					return null !== $value && '' !== $value;
+				}
+			)
 		);
 
 		return add_query_arg( $args, admin_url( 'edit.php' ) );
@@ -144,7 +147,7 @@ final class LeadsPage {
 		$export_url = wp_nonce_url(
 			self::url(
 				array(
-					'form_id'   => $form_id ?: null,
+					'form_id'   => $form_id > 0 ? $form_id : null,
 					'status'    => '' !== $status ? $status : null,
 					's'         => '' !== $search ? $search : null,
 					'lf_action' => 'export',
@@ -313,36 +316,47 @@ final class LeadsPage {
 			return '';
 		}
 
+		// `_n()` is called with the count in place rather than through a helper
+		// taking pre-translated strings: languages with more than two plural
+		// forms cannot be served by a singular/plural pair chosen in PHP.
 		switch ( $action ) {
 			case 'mark_read':
 				foreach ( $ids as $id ) {
 					$this->leads->set_status( $id, 'read' );
 				}
 
-				return $this->count_notice( count( $ids ), __( '%s lead marked as read.', 'lead-forms' ), __( '%s leads marked as read.', 'lead-forms' ) );
+				$count = count( $ids );
+
+				return sprintf(
+					/* translators: %s: number of leads. */
+					_n( '%s lead marked as read.', '%s leads marked as read.', $count, 'lead-forms' ),
+					number_format_i18n( $count )
+				);
 
 			case 'mark_spam':
 				foreach ( $ids as $id ) {
 					$this->leads->set_status( $id, 'spam' );
 				}
 
-				return $this->count_notice( count( $ids ), __( '%s lead marked as spam.', 'lead-forms' ), __( '%s leads marked as spam.', 'lead-forms' ) );
+				$count = count( $ids );
+
+				return sprintf(
+					/* translators: %s: number of leads. */
+					_n( '%s lead marked as spam.', '%s leads marked as spam.', $count, 'lead-forms' ),
+					number_format_i18n( $count )
+				);
 
 			case 'delete':
 				$deleted = $this->leads->delete( $ids );
 
-				return $this->count_notice( $deleted, __( '%s lead deleted.', 'lead-forms' ), __( '%s leads deleted.', 'lead-forms' ) );
+				return sprintf(
+					/* translators: %s: number of leads. */
+					_n( '%s lead deleted.', '%s leads deleted.', $deleted, 'lead-forms' ),
+					number_format_i18n( $deleted )
+				);
 		}
 
 		return '';
-	}
-
-	/**
-	 * Pluralised "N leads …" notice.
-	 */
-	private function count_notice( int $count, string $singular, string $plural ): string {
-		// The strings are already translated by the caller's __() calls.
-		return sprintf( 1 === $count ? $singular : $plural, number_format_i18n( $count ) );
 	}
 
 	/**
@@ -389,8 +403,14 @@ final class LeadsPage {
 			exit;
 		}
 
-		// BOM so Excel opens UTF-8 correctly.
-		fwrite( $out, "\xEF\xBB\xBF" );
+		/*
+		 * WP_Filesystem is the right tool for files on disk, but this is a
+		 * streaming download written straight to php://output -- there is no
+		 * path to hand it, and buffering the whole export in memory first
+		 * would defeat the point.
+		 */
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- streaming to php://output, not a file on disk.
+		fwrite( $out, "\xEF\xBB\xBF" ); // BOM, so Excel reads it as UTF-8.
 
 		$columns = $this->csv_columns( $leads );
 		fputcsv( $out, $columns );
@@ -411,6 +431,7 @@ final class LeadsPage {
 			fputcsv( $out, $row );
 		}
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closing the php://output stream opened above.
 		fclose( $out );
 		exit;
 	}

@@ -68,10 +68,10 @@ final class LeadRepository {
 	public function find( int $id ): ?Lead {
 		global $wpdb;
 
-		$table = self::table_name();
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from $wpdb->prefix.
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ), ARRAY_A );
+		$row = $wpdb->get_row(
+			$wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', self::table_name(), $id ),
+			ARRAY_A
+		);
 
 		return is_array( $row ) ? Lead::from_row( $row ) : null;
 	}
@@ -108,13 +108,15 @@ final class LeadRepository {
 		$per_page = max( 1, min( 500, (int) $args['per_page'] ) );
 		$offset   = max( 0, ( (int) $args['page'] - 1 ) * $per_page );
 
-		$table = self::table_name();
-		$sql   = "SELECT * FROM {$table} {$where} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
+		// %i is a real identifier placeholder (WP 6.2+), so the table name is
+		// escaped by prepare() rather than interpolated by hand.
+		$sql = "SELECT * FROM %i {$where} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
 
+		array_unshift( $params, self::table_name() );
 		$params[] = $per_page;
 		$params[] = $offset;
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is assembled from whitelisted fragments and prepared below.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql holds only whitelisted fragments; every value is bound below.
 		$rows = $wpdb->get_results( $wpdb->prepare( $sql, $params ), ARRAY_A );
 
 		return array_map(
@@ -144,15 +146,13 @@ final class LeadRepository {
 
 		[ $where, $params ] = $this->build_where( $args );
 
-		$table = self::table_name();
-		$sql   = "SELECT COUNT(*) FROM {$table} {$where}";
+		// The table name is always bound as %i, so there is no unprepared
+		// branch to special-case here.
+		$sql = "SELECT COUNT(*) FROM %i {$where}";
 
-		if ( empty( $params ) ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery
-			return (int) $wpdb->get_var( $sql );
-		}
+		array_unshift( $params, self::table_name() );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql holds only whitelisted fragments; every value is bound below.
 		return (int) $wpdb->get_var( $wpdb->prepare( $sql, $params ) );
 	}
 
@@ -167,14 +167,19 @@ final class LeadRepository {
 		$table = self::table_name();
 
 		if ( $form_id > 0 ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$rows = $wpdb->get_results(
-				$wpdb->prepare( "SELECT status, COUNT(*) AS total FROM {$table} WHERE form_id = %d GROUP BY status", $form_id ),
+				$wpdb->prepare(
+					'SELECT status, COUNT(*) AS total FROM %i WHERE form_id = %d GROUP BY status',
+					$table,
+					$form_id
+				),
 				ARRAY_A
 			);
 		} else {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery
-			$rows = $wpdb->get_results( "SELECT status, COUNT(*) AS total FROM {$table} GROUP BY status", ARRAY_A );
+			$rows = $wpdb->get_results(
+				$wpdb->prepare( 'SELECT status, COUNT(*) AS total FROM %i GROUP BY status', $table ),
+				ARRAY_A
+			);
 		}
 
 		$counts = array_fill_keys( self::STATUSES, 0 );
@@ -224,11 +229,14 @@ final class LeadRepository {
 			return 0;
 		}
 
-		$table         = self::table_name();
-		$placeholders  = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
+		// One %d per id, so the IN() list is bound rather than concatenated.
+		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
+		$sql          = "DELETE FROM %i WHERE id IN ({$placeholders})";
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return (int) $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE id IN ({$placeholders})", $ids ) );
+		array_unshift( $ids, self::table_name() );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- placeholders are generated, never interpolated values.
+		return (int) $wpdb->query( $wpdb->prepare( $sql, $ids ) );
 	}
 
 	/**

@@ -32,11 +32,11 @@ function lead_forms_uninstall_site(): void {
 	// 1. Forms (custom post type) and their meta.
 	$form_ids = get_posts(
 		array(
-			'post_type'      => 'lead_form',
-			'post_status'    => 'any',
-			'numberposts'    => -1,
-			'fields'         => 'ids',
-			'no_found_rows'  => true,
+			'post_type'     => 'lead_form',
+			'post_status'   => 'any',
+			'numberposts'   => -1,
+			'fields'        => 'ids',
+			'no_found_rows' => true,
 		)
 	);
 
@@ -71,7 +71,19 @@ function lead_forms_uninstall_site(): void {
 	);
 }
 
-if ( is_multisite() ) {
+/**
+ * Run the cleanup across every site of a network, or just this one.
+ *
+ * Wrapped in a function so the loop variables stay local: anything declared at
+ * file scope here would be a genuine global.
+ */
+function lead_forms_uninstall_all(): void {
+	if ( ! is_multisite() ) {
+		lead_forms_uninstall_site();
+
+		return;
+	}
+
 	$site_ids = get_sites(
 		array(
 			'fields' => 'ids',
@@ -84,6 +96,6 @@ if ( is_multisite() ) {
 		lead_forms_uninstall_site();
 		restore_current_blog();
 	}
-} else {
-	lead_forms_uninstall_site();
 }
+
+lead_forms_uninstall_all();

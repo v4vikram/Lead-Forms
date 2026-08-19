@@ -52,7 +52,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: vendor
-          key: composer-${{ hashFiles('composer.json') }}
+          # Keyed on the lock file so the cache tracks the exact versions
+          # installed, not just the constraints they were resolved from.
+          key: composer-${{ hashFiles('composer.lock') }}
           restore-keys: composer-
 
       - name: Install dependencies

@@ -39,7 +39,7 @@ final class FormBuilderMetabox {
 
 	public function register_hooks(): void {
 		add_action( 'add_meta_boxes_' . FormPostType::POST_TYPE, array( $this, 'add_meta_box' ) );
-		add_action( 'save_post_' . FormPostType::POST_TYPE, array( $this, 'save' ), 10, 2 );
+		add_action( 'save_post_' . FormPostType::POST_TYPE, array( $this, 'save' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_action( 'before_delete_post', array( $this, 'cleanup_leads' ) );
 	}
@@ -352,13 +352,16 @@ final class FormBuilderMetabox {
 	/**
 	 * Persist the submitted fields.
 	 *
-	 * @param int     $post_id Post being saved.
-	 * @param WP_Post $post    Post object.
+	 * @param int $post_id Post being saved.
 	 */
-	public function save( int $post_id, WP_Post $post ): void {
-		if ( ! $this->should_save( $post_id, self::NONCE_NAME, self::NONCE_ACTION ) ) {
+	public function save( int $post_id ): void {
+		// should_save() is what verifies the nonce; PHPCS cannot follow the
+		// call, hence the annotations on the $_POST reads below.
+		if ( ! self::should_save( $post_id, self::NONCE_NAME, self::NONCE_ACTION ) ) {
 			return;
 		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- verified in should_save() above.
 
 		// An absent key means the meta box was not rendered (e.g. a quick edit),
 		// which must not wipe the existing configuration.
@@ -366,8 +369,12 @@ final class FormBuilderMetabox {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in should_save().
+		// Each row is sanitised field by field in Field::from_array(); there is
+		// no single scalar here to run through a sanitiser at this point.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitised per value in Field::from_array().
 		$raw = wp_unslash( $_POST['lf_fields'] );
+
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		$this->forms->save_fields( $post_id, is_array( $raw ) ? $raw : array() );
 	}

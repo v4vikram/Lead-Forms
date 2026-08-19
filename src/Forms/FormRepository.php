@@ -35,12 +35,15 @@ final class FormRepository {
 
 		$post = get_post( $form_id );
 
-		if ( ! $post instanceof WP_Post || FormPostType::POST_TYPE !== $post->post_type ) {
-			return $this->cache[ $form_id ] = null;
-		}
+		$missing = ! $post instanceof WP_Post || FormPostType::POST_TYPE !== $post->post_type;
 
-		if ( 'publish' !== $post->post_status && ! current_user_can( 'edit_post', $form_id ) ) {
-			return $this->cache[ $form_id ] = null;
+		// Drafts stay invisible to visitors but remain previewable by an editor.
+		$hidden = ! $missing && 'publish' !== $post->post_status && ! current_user_can( 'edit_post', $form_id );
+
+		if ( $missing || $hidden ) {
+			$this->cache[ $form_id ] = null;
+
+			return null;
 		}
 
 		$raw_fields = get_post_meta( $form_id, FormPostType::META_FIELDS, true );
@@ -60,7 +63,9 @@ final class FormRepository {
 		 */
 		$form = apply_filters( 'lead_forms_load_form', $form );
 
-		return $this->cache[ $form_id ] = $form;
+		$this->cache[ $form_id ] = $form;
+
+		return $form;
 	}
 
 	/**
@@ -105,7 +110,7 @@ final class FormRepository {
 	/**
 	 * Persist the field list for a form.
 	 *
-	 * @param int                            $form_id Post ID.
+	 * @param int                             $form_id Post ID.
 	 * @param array<int, array<string,mixed>> $raw     Raw field rows from the builder.
 	 */
 	public function save_fields( int $form_id, array $raw ): void {

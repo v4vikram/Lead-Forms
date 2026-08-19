@@ -262,9 +262,12 @@ final class FieldRegistry {
 	 */
 	public static function types_with_options(): array {
 		return array_keys(
-			array_filter( self::all(), static function ( array $type ): bool {
-				return ! empty( $type['has_options'] );
-			} )
+			array_filter(
+				self::all(),
+				static function ( array $type ): bool {
+					return ! empty( $type['has_options'] );
+				}
+			)
 		);
 	}
 }
