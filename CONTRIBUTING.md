@@ -48,6 +48,41 @@ fix: stop the nonce expiring on cached pages
 docs: document the spam check filter
 ```
 
+## Cutting a release
+
+Releases are driven entirely by tags. Before tagging, the same version has to
+appear in four places, or the `verify` job fails the build:
+
+1. `Version:` in the `lead-forms.php` plugin header
+2. the `VERSION` constant just below it
+3. `Stable tag:` in `readme.txt`
+4. a `## [x.y.z]` section in `CHANGELOG.md`
+
+Then:
+
+```bash
+git tag -a v1.0.1 -m "Lead Forms 1.0.1"
+git push origin v1.0.1
+```
+
+That builds the ZIP with `git archive`, checks no development files leaked
+into it, and attaches it to a GitHub release. To rehearse without tagging,
+run the **Release** workflow manually from the Actions tab and download the
+artifact.
+
+### Publishing to WordPress.org
+
+The SVN jobs stay skipped until the plugin is approved. Once it is, add to the
+repository settings:
+
+- variable `WPORG_SLUG` — the slug the directory assigned (lowercase)
+- secrets `WPORG_SVN_USERNAME` and `WPORG_SVN_PASSWORD` — your WordPress.org
+  account, which must have commit access to the plugin
+
+The next tag then pushes to SVN and syncs the listing artwork from
+[`.wordpress-org/`](.wordpress-org/README.md). Setting the variable is the
+switch; without it nothing is published.
+
 ## Reporting bugs
 
 Open an issue with the WordPress and PHP versions, the steps to reproduce, and

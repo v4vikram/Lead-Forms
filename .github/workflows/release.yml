@@ -1,0 +1,159 @@
+name: Release
+
+# Pushing a version tag builds the distributable ZIP, attaches it to a GitHub
+# release, and — once the plugin is approved on WordPress.org — pushes the same
+# code to the plugin directory's SVN repository.
+#
+#   git tag -a v1.0.1 -m "Lead Forms 1.0.1"
+#   git push origin v1.0.1
+#
+# Nothing is published from `main`; only tags trigger this.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  # Allows a dry run from the Actions tab without creating a tag.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (without the leading v), e.g. 1.0.1'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    name: Verify version numbers agree
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve the version being released
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Releasing ${VERSION}"
+
+      # A version that disagrees between the plugin header, the readme's stable
+      # tag and the git tag is the classic way to ship an update that WordPress
+      # then refuses to offer to anyone. Fail loudly instead.
+      - name: Check the version is consistent everywhere
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          FAILED=0
+
+          check() {
+            if [ "$2" != "$VERSION" ]; then
+              echo "::error::$1 is '$2', expected '$VERSION'"
+              FAILED=1
+            else
+              echo "ok  $1 = $2"
+            fi
+          }
+
+          HEADER=$(grep -m1 '^ \* Version:' lead-forms.php | sed -E 's/.*Version:[[:space:]]*//' | tr -d '[:space:]')
+          CONST=$(grep -m1 "^const VERSION" lead-forms.php | sed -E "s/.*'([^']+)'.*/\1/")
+          STABLE=$(grep -m1 '^Stable tag:' readme.txt | sed -E 's/.*Stable tag:[[:space:]]*//' | tr -d '[:space:]')
+
+          check "plugin header Version" "$HEADER"
+          check "VERSION constant" "$CONST"
+          check "readme.txt Stable tag" "$STABLE"
+
+          if ! grep -q "^## \[${VERSION}\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## [${VERSION}]' section"
+            FAILED=1
+          else
+            echo "ok  CHANGELOG.md has a ${VERSION} section"
+          fi
+
+          exit $FAILED
+
+  build:
+    name: Build and publish the ZIP
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # `git archive` honours the export-ignore rules in .gitattributes, so the
+      # ZIP contains only what a site should actually install.
+      - name: Build the distributable ZIP
+        run: |
+          VERSION="${{ needs.verify.outputs.version }}"
+          git archive --format=zip --prefix=lead-forms/ \
+            -o "lead-forms-${VERSION}.zip" HEAD
+          echo "--- contents ---"
+          unzip -l "lead-forms-${VERSION}.zip"
+
+      - name: Fail if development files slipped into the ZIP
+        run: |
+          VERSION="${{ needs.verify.outputs.version }}"
+          if unzip -l "lead-forms-${VERSION}.zip" | grep -E 'composer\.(json|lock)|phpcs\.xml|\.github/|vendor/|\.distignore'; then
+            echo "::error::development files are present in the release ZIP"
+            exit 1
+          fi
+          echo "ZIP is clean"
+
+      - name: Attach the ZIP to a GitHub release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: lead-forms-${{ needs.verify.outputs.version }}.zip
+          generate_release_notes: true
+
+      - name: Keep the ZIP as an artifact for manual runs
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lead-forms-${{ needs.verify.outputs.version }}
+          path: lead-forms-${{ needs.verify.outputs.version }}.zip
+
+  wordpress-org:
+    name: Deploy to WordPress.org
+    needs: [ verify, build ]
+    runs-on: ubuntu-latest
+    # Skipped until the plugin is approved and the repository variable
+    # WPORG_SLUG is set to the slug WordPress.org assigned. That keeps releases
+    # green in the meantime instead of failing on missing credentials.
+    if: github.event_name == 'push' && vars.WPORG_SLUG != ''
+    environment:
+      name: wordpress-org
+      url: https://wordpress.org/plugins/${{ vars.WPORG_SLUG }}/
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push the tag to the plugin directory
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.WPORG_SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.WPORG_SVN_PASSWORD }}
+          # The SVN slug is lowercase and need not match this repository's name.
+          SLUG: ${{ vars.WPORG_SLUG }}
+          VERSION: ${{ needs.verify.outputs.version }}
+
+  wordpress-org-assets:
+    name: Update WordPress.org listing assets
+    needs: wordpress-org
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && vars.WPORG_SLUG != ''
+    steps:
+      - uses: actions/checkout@v4
+
+      # Banner, icon, screenshots and readme.txt live outside the plugin ZIP;
+      # this syncs .wordpress-org/ into the SVN `assets/` directory.
+      - name: Sync banner, icon and screenshots
+        uses: 10up/action-wordpress-plugin-asset-update@stable
+        env:
+          SVN_USERNAME: ${{ secrets.WPORG_SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.WPORG_SVN_PASSWORD }}
+          SLUG: ${{ vars.WPORG_SLUG }}
+          ASSETS_DIR: .wordpress-org
