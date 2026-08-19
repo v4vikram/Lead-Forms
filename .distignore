@@ -1,0 +1,27 @@
+# Files excluded when building the distributable plugin ZIP or deploying to
+# the WordPress.org SVN repository. Everything here is development-only.
+
+.git
+.github
+.gitignore
+.gitattributes
+.distignore
+.editorconfig
+.phpcs-cache
+
+node_modules
+vendor
+tests
+bin
+
+composer.json
+composer.lock
+package.json
+package-lock.json
+phpcs.xml.dist
+phpunit.xml.dist
+
+CONTRIBUTING.md
+SECURITY.md
+CHANGELOG.md
+README.md

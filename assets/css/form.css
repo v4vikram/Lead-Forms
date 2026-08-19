@@ -1,0 +1,390 @@
+/**
+ * Lead Forms — front-end styles.
+ *
+ * Everything is scoped under .lf-wrap and driven by custom properties, so a
+ * site can restyle a form by overriding a handful of variables rather than
+ * fighting selector specificity.
+ */
+
+.lf-wrap {
+	--lf-accent: #1e88f0;
+	--lf-panel: #7ba7d7;
+	--lf-radius: 4px;
+	--lf-gap: 18px;
+	--lf-field-bg: #ffffff;
+	--lf-field-border: #c9d6e4;
+	--lf-text: #10243a;
+	--lf-muted: #5b6b7c;
+	--lf-error: #c0392b;
+	--lf-success: #1f7a3f;
+
+	box-sizing: border-box;
+	container-type: inline-size;
+	max-width: 100%;
+}
+
+.lf-wrap *,
+.lf-wrap *::before,
+.lf-wrap *::after {
+	box-sizing: inherit;
+}
+
+/* -------------------------------------------------------------------------
+ * Classic theme — the coloured panel.
+ * ---------------------------------------------------------------------- */
+
+.lf-theme--classic .lf-form {
+	background: var(--lf-panel);
+	padding: 26px 24px 30px;
+	border-radius: var(--lf-radius);
+}
+
+.lf-theme--classic .lf-form__title {
+	color: #23557f;
+}
+
+.lf-theme--classic .lf-form__header {
+	border-bottom: 2px solid rgba(255, 255, 255, 0.55);
+	padding-bottom: 14px;
+	margin-bottom: 20px;
+}
+
+.lf-theme--minimal .lf-form {
+	background: transparent;
+	padding: 0;
+}
+
+.lf-theme--minimal .lf-form__header {
+	margin-bottom: 20px;
+}
+
+/* -------------------------------------------------------------------------
+ * Header.
+ * ---------------------------------------------------------------------- */
+
+.lf-form__header {
+	text-align: center;
+}
+
+.lf-form__title {
+	margin: 0 0 6px;
+	font-size: clamp(1.25rem, 1.05rem + 0.9cqi, 1.6rem);
+	font-weight: 700;
+	line-height: 1.25;
+	color: var(--lf-text);
+}
+
+.lf-form__subtitle {
+	margin: 0;
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--lf-text);
+	opacity: 0.85;
+}
+
+/* -------------------------------------------------------------------------
+ * Layout.
+ * ---------------------------------------------------------------------- */
+
+.lf-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--lf-gap);
+}
+
+.lf-field--full {
+	grid-column: 1 / -1;
+}
+
+/* One column on narrow containers, not just narrow viewports — so the form
+   also stacks correctly inside a sidebar or a narrow column. */
+@container (max-width: 520px) {
+	.lf-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+@supports not (container-type: inline-size) {
+	@media (max-width: 600px) {
+		.lf-grid {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Fields.
+ * ---------------------------------------------------------------------- */
+
+.lf-label {
+	display: block;
+	margin-bottom: 6px;
+	font-size: 0.95rem;
+	font-weight: 700;
+	line-height: 1.3;
+	color: var(--lf-text);
+}
+
+.lf-required {
+	color: var(--lf-error);
+}
+
+.lf-input {
+	display: block;
+	width: 100%;
+	padding: 10px 12px;
+	font: inherit;
+	font-size: 1rem;
+	line-height: 1.4;
+	color: var(--lf-text);
+	background: var(--lf-field-bg);
+	border: 1px solid var(--lf-field-border);
+	border-radius: var(--lf-radius);
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.lf-input:focus,
+.lf-input:focus-visible {
+	outline: none;
+	border-color: var(--lf-accent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--lf-accent) 28%, transparent);
+}
+
+/* Keyboard users must still get a visible ring if color-mix is unsupported. */
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+	.lf-input:focus {
+		box-shadow: 0 0 0 3px rgba(30, 136, 240, 0.3);
+	}
+}
+
+.lf-textarea {
+	min-height: 140px;
+	resize: vertical;
+}
+
+.lf-select {
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath fill='%235b6b7c' d='M1.4 0 7 5.6 12.6 0 14 1.4 7 8.4 0 1.4z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 12px center;
+	background-size: 11px;
+	padding-right: 34px;
+}
+
+.lf-help {
+	margin: 6px 0 0;
+	font-size: 0.8rem;
+	font-style: italic;
+	line-height: 1.4;
+	color: var(--lf-muted);
+	opacity: 0.9;
+}
+
+.lf-error {
+	margin: 5px 0 0;
+	font-size: 0.8rem;
+	font-weight: 600;
+	line-height: 1.4;
+	color: var(--lf-error);
+}
+
+/* Collapse the error paragraph while empty so it does not add spacing. */
+.lf-error:empty {
+	display: none;
+}
+
+.lf-field.has-error .lf-input {
+	border-color: var(--lf-error);
+}
+
+/* Radio / checkbox groups. */
+
+.lf-fieldset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	min-inline-size: 0;
+}
+
+.lf-fieldset > .lf-label {
+	padding: 0;
+}
+
+.lf-choices {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.lf-choice {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	font-size: 0.95rem;
+	line-height: 1.4;
+	color: var(--lf-text);
+	cursor: pointer;
+}
+
+.lf-choice input {
+	margin: 0;
+	flex: 0 0 auto;
+	inline-size: 1rem;
+	block-size: 1rem;
+	accent-color: var(--lf-accent);
+	translate: 0 0.15em;
+}
+
+.lf-choice--consent .lf-label {
+	display: inline;
+	margin: 0;
+	font-weight: 400;
+}
+
+/* -------------------------------------------------------------------------
+ * Honeypot — hidden from people, reachable by naive bots.
+ * ---------------------------------------------------------------------- */
+
+.lf-hp {
+	position: absolute !important;
+	left: -9999px !important;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+/* -------------------------------------------------------------------------
+ * Actions.
+ * ---------------------------------------------------------------------- */
+
+.lf-actions {
+	margin-top: 22px;
+	text-align: center;
+}
+
+.lf-submit {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	min-width: 150px;
+	padding: 12px 30px;
+	font: inherit;
+	font-size: 0.95rem;
+	font-weight: 600;
+	letter-spacing: 0.03em;
+	color: #fff;
+	background: var(--lf-accent);
+	border: 0;
+	border-radius: var(--lf-radius);
+	cursor: pointer;
+	transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+.lf-submit:hover {
+	filter: brightness(0.93);
+}
+
+.lf-submit:active {
+	transform: translateY(1px);
+}
+
+.lf-submit:focus-visible {
+	outline: 3px solid var(--lf-accent);
+	outline-offset: 3px;
+}
+
+.lf-submit[disabled] {
+	cursor: progress;
+	opacity: 0.75;
+}
+
+.lf-spinner {
+	display: none;
+	width: 15px;
+	height: 15px;
+	border: 2px solid rgba(255, 255, 255, 0.45);
+	border-top-color: #fff;
+	border-radius: 50%;
+	animation: lf-spin 0.7s linear infinite;
+}
+
+.lf-form.is-busy .lf-spinner {
+	display: block;
+}
+
+@keyframes lf-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lf-spinner {
+		animation-duration: 2s;
+	}
+
+	.lf-input,
+	.lf-submit {
+		transition: none;
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Status message.
+ * ---------------------------------------------------------------------- */
+
+.lf-status {
+	display: none;
+	margin-top: 16px;
+	padding: 12px 14px;
+	font-size: 0.92rem;
+	line-height: 1.5;
+	border-radius: var(--lf-radius);
+	border-left: 4px solid transparent;
+}
+
+.lf-status.is-visible {
+	display: block;
+}
+
+.lf-status--success {
+	color: var(--lf-success);
+	background: #eaf7ef;
+	border-left-color: var(--lf-success);
+}
+
+.lf-status--error {
+	color: var(--lf-error);
+	background: #fdecea;
+	border-left-color: var(--lf-error);
+}
+
+/* Hide the fields once the form has been sent successfully. */
+.lf-form.is-sent .lf-grid,
+.lf-form.is-sent .lf-actions {
+	display: none;
+}
+
+.lf-notice {
+	padding: 10px 12px;
+	border-left: 4px solid #d63638;
+	background: #fcf0f1;
+	color: #8a1f23;
+	font-size: 0.9rem;
+}
+
+/* Screen-reader-only text, in case the active theme does not define it. */
+.lf-wrap .screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}

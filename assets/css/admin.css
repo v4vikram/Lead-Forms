@@ -1,0 +1,329 @@
+/**
+ * Lead Forms — admin styles.
+ *
+ * Deliberately close to core's own admin look: this should feel like part of
+ * WordPress, not like a plugin with its own design language.
+ */
+
+/* -------------------------------------------------------------------------
+ * Field builder.
+ * ---------------------------------------------------------------------- */
+
+.lf-builder__intro {
+	margin-top: 0;
+	color: #50575e;
+}
+
+.lf-builder__rows {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-bottom: 14px;
+}
+
+.lf-builder__empty {
+	padding: 18px;
+	margin: 0 0 14px;
+	text-align: center;
+	color: #646970;
+	background: #f6f7f7;
+	border: 1px dashed #c3c4c7;
+	border-radius: 4px;
+}
+
+.lf-row {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+}
+
+.lf-row.is-open {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.lf-row__head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 8px 4px 4px;
+}
+
+.lf-row__toggle {
+	display: flex;
+	flex: 1 1 auto;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 10px;
+	font: inherit;
+	text-align: left;
+	background: none;
+	border: 0;
+	cursor: pointer;
+	border-radius: 3px;
+	min-width: 0;
+}
+
+.lf-row__toggle:hover {
+	background: #f0f0f1;
+}
+
+.lf-row__toggle:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: -2px;
+}
+
+.lf-row__toggle::before {
+	content: "▸";
+	color: #787c82;
+	flex: 0 0 auto;
+}
+
+.lf-row.is-open .lf-row__toggle::before {
+	content: "▾";
+}
+
+.lf-row__title {
+	font-weight: 600;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.lf-row__key {
+	padding: 1px 6px;
+	font-size: 11px;
+	color: #50575e;
+	background: #f0f0f1;
+	border-radius: 3px;
+}
+
+.lf-row__key:empty {
+	display: none;
+}
+
+.lf-row__type {
+	margin-left: auto;
+	padding-left: 10px;
+	font-size: 12px;
+	color: #787c82;
+	white-space: nowrap;
+}
+
+.lf-row__controls {
+	display: flex;
+	gap: 2px;
+	flex: 0 0 auto;
+}
+
+.lf-row__move,
+.lf-row__remove {
+	width: 26px;
+	height: 26px;
+	line-height: 1;
+	text-align: center;
+	color: #50575e;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.lf-row__move:hover {
+	background: #f0f0f1;
+	color: #135e96;
+}
+
+.lf-row__remove {
+	font-size: 18px;
+}
+
+.lf-row__remove:hover {
+	background: #fcf0f1;
+	color: #d63638;
+}
+
+.lf-row__body {
+	padding: 4px 14px 14px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.lf-row__control {
+	margin: 12px 0 0;
+}
+
+.lf-row__control > label {
+	display: block;
+	margin-bottom: 4px;
+	font-weight: 600;
+}
+
+.lf-row__control--inline {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 18px;
+}
+
+.lf-row__control--inline > label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	font-weight: 400;
+}
+
+.lf-builder__add {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+/* Validation sub-panel inside a field row. */
+
+.lf-row__validation {
+	margin: 16px 0 0;
+	padding: 4px 14px 14px;
+	border: 1px solid #e0e0e1;
+	border-radius: 4px;
+	background: #fafafa;
+}
+
+.lf-row__validation > legend {
+	padding: 0 6px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: #646970;
+}
+
+.lf-row__validation .lf-row__control:first-of-type {
+	margin-top: 6px;
+}
+
+.lf-rule {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 10px;
+}
+
+.lf-rule[hidden] {
+	display: none;
+}
+
+.lf-rule__label {
+	flex: 0 0 110px;
+	font-weight: 600;
+}
+
+.lf-rule > label {
+	margin: 0 0 0 4px;
+	font-weight: 400;
+	color: #50575e;
+}
+
+.lf-rule > input[type="date"] {
+	padding: 2px 6px;
+}
+
+/* The custom-regex row keeps its stacked layout. */
+.lf-rule[data-lf-custom-pattern] {
+	display: block;
+}
+
+.lf-rule[data-lf-custom-pattern][hidden] {
+	display: none;
+}
+
+/* -------------------------------------------------------------------------
+ * Forms list table.
+ * ---------------------------------------------------------------------- */
+
+.lf-shortcode-field {
+	width: 100%;
+	max-width: 190px;
+	padding: 3px 6px;
+	font-family: Consolas, Monaco, monospace;
+	font-size: 12px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 3px;
+}
+
+/* -------------------------------------------------------------------------
+ * Leads screen.
+ * ---------------------------------------------------------------------- */
+
+.lf-dot {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	margin-right: 7px;
+	vertical-align: middle;
+	background: #2271b1;
+	border-radius: 50%;
+}
+
+.lf-details {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.lf-kv {
+	font-size: 12px;
+	line-height: 1.5;
+	color: #3c434a;
+}
+
+.lf-kv__k {
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.lf-kv__k::after {
+	content: ":";
+}
+
+.lf-lead-card {
+	max-width: 780px;
+	margin-top: 16px;
+}
+
+.lf-lead-card h2 {
+	margin: 26px 0 8px;
+	font-size: 14px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #646970;
+}
+
+.lf-lead-table th {
+	width: 200px;
+	vertical-align: top;
+	padding: 12px;
+}
+
+.lf-lead-table td {
+	padding: 12px;
+	word-break: break-word;
+}
+
+/* -------------------------------------------------------------------------
+ * Settings meta boxes.
+ * ---------------------------------------------------------------------- */
+
+.lf-settings .description code {
+	font-size: 11px;
+	padding: 1px 5px;
+	background: #f0f0f1;
+}
+
+.lf-settings input[type="color"] {
+	width: 58px;
+	height: 32px;
+	padding: 2px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	background: #fff;
+	cursor: pointer;
+}
