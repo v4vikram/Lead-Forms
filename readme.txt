@@ -128,3 +128,8 @@ Actions:
 
 = 1.0.0 =
 * Initial release.
+
+== Upgrade Notice ==
+
+= 1.0.0 =
+First release.
